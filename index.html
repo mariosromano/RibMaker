@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Rib/Fin Maker - Architectural Facade Generator</title>
+    <title>M|R Walls Rib Maker</title>
     <style>
         * {
             margin: 0;
@@ -37,15 +37,33 @@
             height: 100vh;
         }
 
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+
+        .brand-logo {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+
+        .brand-logo .divider {
+            color: #7c9bff;
+            margin: 0 2px;
+        }
+
         h1 {
-            font-size: 16px;
-            margin-bottom: 8px;
-            font-weight: 600;
+            font-size: 15px;
+            font-weight: 500;
+            color: #aaa;
         }
 
         .subtitle {
-            font-size: 12px;
-            color: #888;
+            font-size: 11px;
+            color: #666;
             margin-bottom: 20px;
         }
 
@@ -174,10 +192,30 @@
             padding: 10px;
             background: #1a1a1f;
             border-radius: 4px;
-            line-height: 1.6;
+            line-height: 1.8;
         }
 
         #dimensions-display strong {
+            color: #aaa;
+        }
+
+        .pricing-box {
+            background: #2d4a2d;
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 12px;
+            font-family: monospace;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .pricing-box .price {
+            font-size: 18px;
+            font-weight: 700;
+            color: #8eff8e;
+        }
+
+        .pricing-box strong {
             color: #aaa;
         }
     </style>
@@ -186,7 +224,10 @@
     <div class="container">
         <div id="canvas-container"></div>
         <div class="controls">
-            <h1>3D Fin/Rib Generator</h1>
+            <div class="brand">
+                <div class="brand-logo">M<span class="divider">|</span>R Walls</div>
+            </div>
+            <h1>Rib Maker</h1>
             <p class="subtitle">Architectural facade panel designer</p>
 
             <div class="section">
@@ -262,20 +303,27 @@
 
             <div class="section">
                 <div class="section-title">Export</div>
-                <button onclick="exportDXF()">Export DXF (All Ribs)</button>
-                <button onclick="exportSingleDXF()" class="secondary">Export Single Rib DXF</button>
+                <button onclick="exportImage()">Download Image</button>
+                <button onclick="exportDXF()" class="secondary">Export DXF (All Ribs)</button>
                 <button onclick="exportCSV()" class="secondary">Export Dimensions CSV</button>
             </div>
 
             <div id="dimensions-display">
                 <strong>Number of Ribs:</strong> <span id="ribCount">--</span><br>
                 <strong>Total Array Width:</strong> <span id="totalWidth">--</span><br>
-                <strong>Wall Coverage:</strong> <span id="wallCoverage">--</span>
+                <strong>Wall Coverage:</strong> <span id="wallCoverage">--</span><br>
+                <strong>Surface Area:</strong> <span id="surfaceArea">--</span>
+            </div>
+
+            <div class="pricing-box">
+                <strong>Estimated Price</strong><br>
+                <span id="surfaceAreaCalc">--</span> @ $50/sf<br>
+                <span class="price" id="totalPrice">--</span>
             </div>
 
             <div class="info-box">
                 <strong>Controls:</strong> Left-click drag to rotate, right-click drag to pan, scroll to zoom.<br><br>
-                <strong>DXF Export:</strong> Each rib is exported as a 2D profile for CNC cutting. Units are inches.
+                <strong>Surface Area:</strong> Calculated as rib height x max depth per rib.
             </div>
         </div>
     </div>
@@ -288,6 +336,7 @@
         let wallMesh;
 
         const waveTypes = ['Sine', 'Smooth', 'Sharp'];
+        const PRICE_PER_SF = 50;
 
         function init() {
             const container = document.getElementById('canvas-container');
@@ -301,7 +350,7 @@
             camera.position.set(0, 60, 250);
 
             // Renderer
-            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
             renderer.setSize(container.clientWidth, container.clientHeight);
             renderer.shadowMap.enabled = true;
             renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -361,8 +410,8 @@
             };
         }
 
-        function waveFunction(t, frequency, waveType) {
-            const angle = t * frequency * Math.PI * 2;
+        function waveFunction(t, frequency, waveType, phaseShift) {
+            const angle = t * frequency * Math.PI * 2 + phaseShift;
             switch(waveType) {
                 case 0: // Sine
                     return Math.sin(angle);
@@ -380,48 +429,43 @@
             const phaseShift = ribIndex * phase * Math.PI * 2;
             const segments = 80;
 
-            // Build vertices for the rib
-            // Rib is vertical (Y-up), extends in Z direction (depth from wall)
-            // Thickness is in X direction
-
             const vertices = [];
             const indices = [];
 
-            // For each segment along the height, we create 4 vertices (front-left, front-right, back-left, back-right)
             for (let i = 0; i <= segments; i++) {
                 const t = i / segments;
                 const y = t * height;
-                const wave = waveFunction(t, frequency, waveType);
+                const wave = waveFunction(t, frequency, waveType, phaseShift);
                 const depth = minDepth + (maxDepth - minDepth) * (wave + 1) / 2;
 
                 const halfThick = thickness / 2;
 
                 // Back vertices (at wall, z = 0)
-                vertices.push(-halfThick, y, 0);      // back-left
-                vertices.push(halfThick, y, 0);       // back-right
+                vertices.push(-halfThick, y, 0);
+                vertices.push(halfThick, y, 0);
 
                 // Front vertices (at depth)
-                vertices.push(-halfThick, y, depth);  // front-left
-                vertices.push(halfThick, y, depth);   // front-right
+                vertices.push(-halfThick, y, depth);
+                vertices.push(halfThick, y, depth);
             }
 
             // Create faces
             for (let i = 0; i < segments; i++) {
                 const base = i * 4;
 
-                // Back face (facing -Z, at wall)
+                // Back face
                 indices.push(base + 0, base + 4, base + 1);
                 indices.push(base + 1, base + 4, base + 5);
 
-                // Front face (facing +Z)
+                // Front face
                 indices.push(base + 2, base + 3, base + 6);
                 indices.push(base + 3, base + 7, base + 6);
 
-                // Left face (facing -X)
+                // Left face
                 indices.push(base + 0, base + 2, base + 4);
                 indices.push(base + 2, base + 6, base + 4);
 
-                // Right face (facing +X)
+                // Right face
                 indices.push(base + 1, base + 5, base + 3);
                 indices.push(base + 3, base + 5, base + 7);
             }
@@ -468,7 +512,6 @@
                 const geometry = createRibGeometry(params, i);
                 const rib = new THREE.Mesh(geometry, material);
 
-                // Position along X axis
                 rib.position.x = startX + i * params.spacing;
                 rib.position.y = 0;
                 rib.position.z = 0;
@@ -501,7 +544,19 @@
             document.getElementById('ribCount').textContent = params.count;
             document.getElementById('totalWidth').textContent = totalWidth.toFixed(1) + '" (' + (totalWidth / 12).toFixed(1) + "')";
             document.getElementById('wallCoverage').textContent =
-                (totalWidth / 12).toFixed(1) + "' wide × " + (params.height / 12).toFixed(1) + "' tall";
+                (totalWidth / 12).toFixed(1) + "' wide x " + (params.height / 12).toFixed(1) + "' tall";
+
+            // Surface area calculation: height x maxDepth per rib (as rectangle)
+            const surfaceAreaPerRibSqIn = params.height * params.maxDepth;
+            const surfaceAreaPerRibSqFt = surfaceAreaPerRibSqIn / 144;
+            const totalSurfaceAreaSqFt = surfaceAreaPerRibSqFt * params.count;
+
+            document.getElementById('surfaceArea').textContent = totalSurfaceAreaSqFt.toFixed(1) + ' sf';
+
+            // Pricing
+            document.getElementById('surfaceAreaCalc').textContent = totalSurfaceAreaSqFt.toFixed(1) + ' sf';
+            const totalPrice = totalSurfaceAreaSqFt * PRICE_PER_SF;
+            document.getElementById('totalPrice').textContent = '$' + totalPrice.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
         }
 
         function setupControls() {
@@ -554,29 +609,25 @@
             controls.update();
         }
 
-        // DXF Export functions
+        function exportImage() {
+            renderer.render(scene, camera);
+            const link = document.createElement('a');
+            link.download = 'mr-walls-ribs.png';
+            link.href = renderer.domElement.toDataURL('image/png');
+            link.click();
+        }
+
         function exportDXF() {
             const params = getParams();
             let dxf = generateDXFHeader();
 
-            // Export each rib profile, laid out side by side for cutting
-            const layoutSpacing = params.maxDepth + 5; // Space between profiles in layout
-
             for (let i = 0; i < params.count; i++) {
-                const offsetY = i * (params.height + 10); // Stack vertically in DXF
+                const offsetY = i * (params.height + 10);
                 dxf += generateRibProfileDXF(params, i, 0, offsetY);
             }
 
             dxf += "0\nENDSEC\n0\nEOF\n";
-            downloadFile(dxf, 'ribs_array.dxf', 'application/dxf');
-        }
-
-        function exportSingleDXF() {
-            const params = getParams();
-            let dxf = generateDXFHeader();
-            dxf += generateRibProfileDXF(params, 0, 0, 0);
-            dxf += "0\nENDSEC\n0\nEOF\n";
-            downloadFile(dxf, 'single_rib.dxf', 'application/dxf');
+            downloadFile(dxf, 'mr-walls-ribs.dxf', 'application/dxf');
         }
 
         function generateDXFHeader() {
@@ -604,7 +655,6 @@ ENTITIES
 
             let dxf = '';
 
-            // Generate closed polyline for the rib profile (side view: Y is height, X is depth)
             dxf += `0
 LWPOLYLINE
 8
@@ -615,18 +665,16 @@ ${(segments + 1) * 2 + 2}
 1
 `;
 
-            // Bottom edge at wall (y = 0, x = 0)
             dxf += `10
 ${offsetX.toFixed(4)}
 20
 ${offsetY.toFixed(4)}
 `;
 
-            // Front edge going up (wavy)
             for (let i = 0; i <= segments; i++) {
                 const t = i / segments;
                 const y = t * height;
-                const wave = waveFunction(t, frequency, waveType);
+                const wave = waveFunction(t, frequency, waveType, phaseShift);
                 const depth = minDepth + (maxDepth - minDepth) * (wave + 1) / 2;
 
                 dxf += `10
@@ -636,7 +684,6 @@ ${(offsetY + y).toFixed(4)}
 `;
             }
 
-            // Top edge back to wall
             dxf += `10
 ${offsetX.toFixed(4)}
 20
@@ -662,7 +709,16 @@ ${(offsetY + height).toFixed(4)}
             csv += `Wave Frequency,${params.frequency}\n`;
             csv += `Wave Type,${waveTypes[params.waveType]}\n`;
 
-            downloadFile(csv, 'rib_dimensions.csv', 'text/csv');
+            // Surface area and pricing
+            const surfaceAreaPerRibSqFt = (params.height * params.maxDepth) / 144;
+            const totalSurfaceAreaSqFt = surfaceAreaPerRibSqFt * params.count;
+            csv += `\nPricing\n`;
+            csv += `Surface Area per Rib,${surfaceAreaPerRibSqFt.toFixed(2)} sf\n`;
+            csv += `Total Surface Area,${totalSurfaceAreaSqFt.toFixed(2)} sf\n`;
+            csv += `Price per SF,$${PRICE_PER_SF}\n`;
+            csv += `Total Price,$${(totalSurfaceAreaSqFt * PRICE_PER_SF).toFixed(2)}\n`;
+
+            downloadFile(csv, 'mr-walls-ribs.csv', 'text/csv');
         }
 
         function downloadFile(content, filename, mimeType) {
