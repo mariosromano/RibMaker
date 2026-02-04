@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Rib/Fin Maker - Architectural Facade Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a1f;
+            color: white;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #canvas-container {
+            flex: 1;
+            position: relative;
+        }
+
+        .controls {
+            width: 320px;
+            padding: 20px;
+            background: #2a2a30;
+            overflow-y: auto;
+            height: 100vh;
+        }
+
+        h1 {
+            font-size: 16px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 20px;
+        }
+
+        .section {
+            background: #3a3a42;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .control-group {
+            margin-bottom: 14px;
+        }
+
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .control-group label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 13px;
+            color: #ccc;
+        }
+
+        .control-group label span {
+            color: #7c9bff;
+            font-weight: 500;
+            font-family: monospace;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 4px;
+            border-radius: 2px;
+            background: #555;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #7c9bff;
+            cursor: pointer;
+        }
+
+        input[type="color"] {
+            width: 100%;
+            height: 36px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: transparent;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 8px;
+            border: none;
+            border-radius: 6px;
+            background: #7c9bff;
+            color: white;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #6b8aee;
+        }
+
+        button.secondary {
+            background: #4a4a52;
+        }
+
+        button.secondary:hover {
+            background: #5a5a62;
+        }
+
+        .info-box {
+            background: #1a1a1f;
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 16px;
+            font-size: 12px;
+            color: #888;
+            line-height: 1.5;
+        }
+
+        .info-box strong {
+            color: #aaa;
+        }
+
+        .view-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .view-buttons button {
+            flex: 1;
+            padding: 8px;
+            font-size: 11px;
+        }
+
+        #dimensions-display {
+            font-family: monospace;
+            font-size: 11px;
+            color: #888;
+            margin-top: 12px;
+            padding: 10px;
+            background: #1a1a1f;
+            border-radius: 4px;
+            line-height: 1.6;
+        }
+
+        #dimensions-display strong {
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="canvas-container"></div>
+        <div class="controls">
+            <h1>3D Fin/Rib Generator</h1>
+            <p class="subtitle">Architectural facade panel designer</p>
+
+            <div class="section">
+                <div class="section-title">Array Settings</div>
+
+                <div class="control-group">
+                    <label>Number of Ribs <span id="countVal">15</span></label>
+                    <input type="range" id="count" min="10" max="60" value="15">
+                </div>
+
+                <div class="control-group">
+                    <label>Spacing (center to center) <span id="spacingVal">6"</span></label>
+                    <input type="range" id="spacing" min="4" max="12" value="6" step="0.5">
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Rib Dimensions</div>
+
+                <div class="control-group">
+                    <label>Rib Height <span id="heightVal">96"</span></label>
+                    <input type="range" id="height" min="72" max="144" value="96" step="1">
+                </div>
+
+                <div class="control-group">
+                    <label>Min Depth (from wall) <span id="minDepthVal">3"</span></label>
+                    <input type="range" id="minDepth" min="1" max="10" value="3" step="0.5">
+                </div>
+
+                <div class="control-group">
+                    <label>Max Depth (from wall) <span id="maxDepthVal">10"</span></label>
+                    <input type="range" id="maxDepth" min="4" max="24" value="10" step="0.5">
+                </div>
+
+                <div class="control-group">
+                    <label>Rib Thickness <span id="thicknessVal">0.5"</span></label>
+                    <input type="range" id="thickness" min="0.25" max="2" value="0.5" step="0.125">
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Wave Pattern</div>
+
+                <div class="control-group">
+                    <label>Wave Frequency <span id="frequencyVal">3</span></label>
+                    <input type="range" id="frequency" min="0.5" max="8" value="3" step="0.5">
+                </div>
+
+                <div class="control-group">
+                    <label>Phase Offset <span id="phaseVal">0.25</span></label>
+                    <input type="range" id="phase" min="0" max="1" value="0.25" step="0.05">
+                </div>
+
+                <div class="control-group">
+                    <label>Wave Type <span id="waveTypeVal">Sine</span></label>
+                    <input type="range" id="waveType" min="0" max="2" value="0" step="1">
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">View</div>
+                <div class="view-buttons">
+                    <button class="secondary" onclick="setView('front')">Front</button>
+                    <button class="secondary" onclick="setView('top')">Top</button>
+                    <button class="secondary" onclick="setView('side')">Side</button>
+                    <button class="secondary" onclick="setView('perspective')">3D</button>
+                </div>
+                <div class="control-group">
+                    <label>Rib Color</label>
+                    <input type="color" id="color" value="#e8ecef">
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Export</div>
+                <button onclick="exportDXF()">Export DXF (All Ribs)</button>
+                <button onclick="exportSingleDXF()" class="secondary">Export Single Rib DXF</button>
+                <button onclick="exportCSV()" class="secondary">Export Dimensions CSV</button>
+            </div>
+
+            <div id="dimensions-display">
+                <strong>Number of Ribs:</strong> <span id="ribCount">--</span><br>
+                <strong>Total Array Width:</strong> <span id="totalWidth">--</span><br>
+                <strong>Wall Coverage:</strong> <span id="wallCoverage">--</span>
+            </div>
+
+            <div class="info-box">
+                <strong>Controls:</strong> Left-click drag to rotate, right-click drag to pan, scroll to zoom.<br><br>
+                <strong>DXF Export:</strong> Each rib is exported as a 2D profile for CNC cutting. Units are inches.
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script>
+        let scene, camera, renderer, controls;
+        let ribMeshes = [];
+        let wallMesh;
+
+        const waveTypes = ['Sine', 'Smooth', 'Sharp'];
+
+        function init() {
+            const container = document.getElementById('canvas-container');
+
+            // Scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1a1a1f);
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 10000);
+            camera.position.set(0, 60, 250);
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+
+            // Controls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.target.set(0, 48, 0);
+
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(50, 100, 80);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 2048;
+            directionalLight.shadow.mapSize.height = 2048;
+            scene.add(directionalLight);
+
+            const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
+            fillLight.position.set(-50, 50, -50);
+            scene.add(fillLight);
+
+            // Ground grid
+            const gridHelper = new THREE.GridHelper(500, 50, 0x444444, 0x333333);
+            gridHelper.position.y = 0;
+            scene.add(gridHelper);
+
+            // Build initial ribs
+            buildRibs();
+
+            // Handle resize
+            window.addEventListener('resize', onWindowResize);
+
+            // Setup control listeners
+            setupControls();
+
+            // Start animation
+            animate();
+        }
+
+        function getParams() {
+            return {
+                height: parseFloat(document.getElementById('height').value),
+                minDepth: parseFloat(document.getElementById('minDepth').value),
+                maxDepth: parseFloat(document.getElementById('maxDepth').value),
+                thickness: parseFloat(document.getElementById('thickness').value),
+                count: parseInt(document.getElementById('count').value),
+                spacing: parseFloat(document.getElementById('spacing').value),
+                frequency: parseFloat(document.getElementById('frequency').value),
+                phase: parseFloat(document.getElementById('phase').value),
+                waveType: parseInt(document.getElementById('waveType').value),
+                color: document.getElementById('color').value
+            };
+        }
+
+        function waveFunction(t, frequency, waveType) {
+            const angle = t * frequency * Math.PI * 2;
+            switch(waveType) {
+                case 0: // Sine
+                    return Math.sin(angle);
+                case 1: // Smooth
+                    return Math.sin(angle) * Math.abs(Math.sin(angle));
+                case 2: // Sharp
+                    return Math.asin(Math.sin(angle)) / (Math.PI / 2);
+                default:
+                    return Math.sin(angle);
+            }
+        }
+
+        function createRibGeometry(params, ribIndex) {
+            const { height, minDepth, maxDepth, thickness, frequency, phase, waveType } = params;
+            const phaseShift = ribIndex * phase * Math.PI * 2;
+            const segments = 80;
+
+            // Build vertices for the rib
+            // Rib is vertical (Y-up), extends in Z direction (depth from wall)
+            // Thickness is in X direction
+
+            const vertices = [];
+            const indices = [];
+
+            // For each segment along the height, we create 4 vertices (front-left, front-right, back-left, back-right)
+            for (let i = 0; i <= segments; i++) {
+                const t = i / segments;
+                const y = t * height;
+                const wave = waveFunction(t, frequency, waveType);
+                const depth = minDepth + (maxDepth - minDepth) * (wave + 1) / 2;
+
+                const halfThick = thickness / 2;
+
+                // Back vertices (at wall, z = 0)
+                vertices.push(-halfThick, y, 0);      // back-left
+                vertices.push(halfThick, y, 0);       // back-right
+
+                // Front vertices (at depth)
+                vertices.push(-halfThick, y, depth);  // front-left
+                vertices.push(halfThick, y, depth);   // front-right
+            }
+
+            // Create faces
+            for (let i = 0; i < segments; i++) {
+                const base = i * 4;
+
+                // Back face (facing -Z, at wall)
+                indices.push(base + 0, base + 4, base + 1);
+                indices.push(base + 1, base + 4, base + 5);
+
+                // Front face (facing +Z)
+                indices.push(base + 2, base + 3, base + 6);
+                indices.push(base + 3, base + 7, base + 6);
+
+                // Left face (facing -X)
+                indices.push(base + 0, base + 2, base + 4);
+                indices.push(base + 2, base + 6, base + 4);
+
+                // Right face (facing +X)
+                indices.push(base + 1, base + 5, base + 3);
+                indices.push(base + 3, base + 5, base + 7);
+            }
+
+            // Top cap
+            const topBase = segments * 4;
+            indices.push(topBase + 0, topBase + 1, topBase + 2);
+            indices.push(topBase + 1, topBase + 3, topBase + 2);
+
+            // Bottom cap
+            indices.push(0, 2, 1);
+            indices.push(1, 2, 3);
+
+            const geometry = new THREE.BufferGeometry();
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+            geometry.setIndex(indices);
+            geometry.computeVertexNormals();
+
+            return geometry;
+        }
+
+        function buildRibs() {
+            // Remove existing ribs
+            ribMeshes.forEach(rib => scene.remove(rib));
+            ribMeshes = [];
+            if (wallMesh) scene.remove(wallMesh);
+
+            const params = getParams();
+
+            // Material
+            const material = new THREE.MeshStandardMaterial({
+                color: params.color,
+                roughness: 0.3,
+                metalness: 0.1,
+                side: THREE.DoubleSide
+            });
+
+            // Calculate positions - center the array
+            const totalWidth = (params.count - 1) * params.spacing;
+            const startX = -totalWidth / 2;
+
+            // Create each rib
+            for (let i = 0; i < params.count; i++) {
+                const geometry = createRibGeometry(params, i);
+                const rib = new THREE.Mesh(geometry, material);
+
+                // Position along X axis
+                rib.position.x = startX + i * params.spacing;
+                rib.position.y = 0;
+                rib.position.z = 0;
+
+                rib.castShadow = true;
+                rib.receiveShadow = true;
+
+                scene.add(rib);
+                ribMeshes.push(rib);
+            }
+
+            // Create wall backdrop
+            const wallGeometry = new THREE.PlaneGeometry(totalWidth + 40, params.height + 10);
+            const wallMaterial = new THREE.MeshStandardMaterial({
+                color: 0x3a3a40,
+                roughness: 0.9,
+                metalness: 0,
+                side: THREE.DoubleSide
+            });
+            wallMesh = new THREE.Mesh(wallGeometry, wallMaterial);
+            wallMesh.position.set(0, params.height / 2, -0.5);
+            wallMesh.receiveShadow = true;
+            scene.add(wallMesh);
+
+            // Update info display
+            updateDimensionsDisplay(params, totalWidth);
+        }
+
+        function updateDimensionsDisplay(params, totalWidth) {
+            document.getElementById('ribCount').textContent = params.count;
+            document.getElementById('totalWidth').textContent = totalWidth.toFixed(1) + '" (' + (totalWidth / 12).toFixed(1) + "')";
+            document.getElementById('wallCoverage').textContent =
+                (totalWidth / 12).toFixed(1) + "' wide × " + (params.height / 12).toFixed(1) + "' tall";
+        }
+
+        function setupControls() {
+            const rangeInputs = document.querySelectorAll('input[type="range"]');
+            rangeInputs.forEach(input => {
+                input.addEventListener('input', () => {
+                    updateValueDisplays();
+                    buildRibs();
+                });
+            });
+
+            document.getElementById('color').addEventListener('input', buildRibs);
+        }
+
+        function updateValueDisplays() {
+            document.getElementById('heightVal').textContent = document.getElementById('height').value + '"';
+            document.getElementById('minDepthVal').textContent = document.getElementById('minDepth').value + '"';
+            document.getElementById('maxDepthVal').textContent = document.getElementById('maxDepth').value + '"';
+            document.getElementById('thicknessVal').textContent = document.getElementById('thickness').value + '"';
+            document.getElementById('countVal').textContent = document.getElementById('count').value;
+            document.getElementById('spacingVal').textContent = document.getElementById('spacing').value + '"';
+            document.getElementById('frequencyVal').textContent = document.getElementById('frequency').value;
+            document.getElementById('phaseVal').textContent = document.getElementById('phase').value;
+            document.getElementById('waveTypeVal').textContent = waveTypes[document.getElementById('waveType').value];
+        }
+
+        function setView(view) {
+            const params = getParams();
+            const totalWidth = (params.count - 1) * params.spacing;
+            const centerY = params.height / 2;
+
+            switch(view) {
+                case 'front':
+                    camera.position.set(0, centerY, totalWidth * 1.2);
+                    controls.target.set(0, centerY, 0);
+                    break;
+                case 'top':
+                    camera.position.set(0, params.height + 100, 0);
+                    controls.target.set(0, 0, params.maxDepth / 2);
+                    break;
+                case 'side':
+                    camera.position.set(totalWidth, centerY, params.maxDepth / 2);
+                    controls.target.set(0, centerY, params.maxDepth / 2);
+                    break;
+                case 'perspective':
+                    camera.position.set(totalWidth * 0.6, centerY + 30, totalWidth * 0.8);
+                    controls.target.set(0, centerY, 0);
+                    break;
+            }
+            controls.update();
+        }
+
+        // DXF Export functions
+        function exportDXF() {
+            const params = getParams();
+            let dxf = generateDXFHeader();
+
+            // Export each rib profile, laid out side by side for cutting
+            const layoutSpacing = params.maxDepth + 5; // Space between profiles in layout
+
+            for (let i = 0; i < params.count; i++) {
+                const offsetY = i * (params.height + 10); // Stack vertically in DXF
+                dxf += generateRibProfileDXF(params, i, 0, offsetY);
+            }
+
+            dxf += "0\nENDSEC\n0\nEOF\n";
+            downloadFile(dxf, 'ribs_array.dxf', 'application/dxf');
+        }
+
+        function exportSingleDXF() {
+            const params = getParams();
+            let dxf = generateDXFHeader();
+            dxf += generateRibProfileDXF(params, 0, 0, 0);
+            dxf += "0\nENDSEC\n0\nEOF\n";
+            downloadFile(dxf, 'single_rib.dxf', 'application/dxf');
+        }
+
+        function generateDXFHeader() {
+            return `0
+SECTION
+2
+HEADER
+9
+$INSUNITS
+70
+1
+0
+ENDSEC
+0
+SECTION
+2
+ENTITIES
+`;
+        }
+
+        function generateRibProfileDXF(params, ribIndex, offsetX, offsetY) {
+            const { height, minDepth, maxDepth, frequency, phase, waveType } = params;
+            const phaseShift = ribIndex * phase * Math.PI * 2;
+            const segments = 80;
+
+            let dxf = '';
+
+            // Generate closed polyline for the rib profile (side view: Y is height, X is depth)
+            dxf += `0
+LWPOLYLINE
+8
+RIB_${ribIndex}
+90
+${(segments + 1) * 2 + 2}
+70
+1
+`;
+
+            // Bottom edge at wall (y = 0, x = 0)
+            dxf += `10
+${offsetX.toFixed(4)}
+20
+${offsetY.toFixed(4)}
+`;
+
+            // Front edge going up (wavy)
+            for (let i = 0; i <= segments; i++) {
+                const t = i / segments;
+                const y = t * height;
+                const wave = waveFunction(t, frequency, waveType);
+                const depth = minDepth + (maxDepth - minDepth) * (wave + 1) / 2;
+
+                dxf += `10
+${(offsetX + depth).toFixed(4)}
+20
+${(offsetY + y).toFixed(4)}
+`;
+            }
+
+            // Top edge back to wall
+            dxf += `10
+${offsetX.toFixed(4)}
+20
+${(offsetY + height).toFixed(4)}
+`;
+
+            return dxf;
+        }
+
+        function exportCSV() {
+            const params = getParams();
+            let csv = 'Rib Index,Height (in),Min Depth (in),Max Depth (in),Thickness (in),Phase Shift (rad)\n';
+
+            for (let i = 0; i < params.count; i++) {
+                const phaseShift = i * params.phase * Math.PI * 2;
+                csv += `${i},${params.height},${params.minDepth},${params.maxDepth},${params.thickness},${phaseShift.toFixed(4)}\n`;
+            }
+
+            csv += `\nArray Settings\n`;
+            csv += `Total Ribs,${params.count}\n`;
+            csv += `Spacing,${params.spacing}"\n`;
+            csv += `Total Width,${((params.count - 1) * params.spacing).toFixed(2)}"\n`;
+            csv += `Wave Frequency,${params.frequency}\n`;
+            csv += `Wave Type,${waveTypes[params.waveType]}\n`;
+
+            downloadFile(csv, 'rib_dimensions.csv', 'text/csv');
+        }
+
+        function downloadFile(content, filename, mimeType) {
+            const blob = new Blob([content], { type: mimeType });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+            URL.revokeObjectURL(link.href);
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('canvas-container');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // Initialize
+        init();
+        updateValueDisplays();
+    </script>
+</body>
+</html>
