@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rib Maker Pattern Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #1a1a1f;
+            color: white;
+            padding: 40px;
+        }
+        h1 {
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #888;
+            margin-bottom: 30px;
+        }
+        .patterns {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+        }
+        .pattern-card {
+            background: #2a2a30;
+            border-radius: 12px;
+            padding: 16px;
+        }
+        .pattern-card h3 {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .pattern-card p {
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 12px;
+        }
+        canvas {
+            width: 100%;
+            height: 150px;
+            border-radius: 8px;
+            background: #000;
+            display: block;
+            margin-bottom: 12px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            background: #7c9bff;
+            color: white;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #6b8aee;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sample Patterns for M|R Walls Rib Maker</h1>
+    <p class="subtitle">Click any pattern to download, then drag it into the Rib Maker</p>
+
+    <div class="patterns">
+        <div class="pattern-card">
+            <h3>Horizontal Gradient</h3>
+            <p>Creates wave that flows across all ribs - left ribs shallow, right ribs deep</p>
+            <canvas id="horizontal-gradient"></canvas>
+            <button onclick="download('horizontal-gradient')">Download PNG</button>
+        </div>
+
+        <div class="pattern-card">
+            <h3>Vertical Gradient</h3>
+            <p>All ribs same profile - shallow at bottom, deep at top</p>
+            <canvas id="vertical-gradient"></canvas>
+            <button onclick="download('vertical-gradient')">Download PNG</button>
+        </div>
+
+        <div class="pattern-card">
+            <h3>Center Gradient</h3>
+            <p>Deep in center, shallow at edges - creates bulge effect</p>
+            <canvas id="center-gradient"></canvas>
+            <button onclick="download('center-gradient')">Download PNG</button>
+        </div>
+
+        <div class="pattern-card">
+            <h3>Radial Gradient</h3>
+            <p>Circular pattern from center - creates dome-like shape</p>
+            <canvas id="radial-gradient"></canvas>
+            <button onclick="download('radial-gradient')">Download PNG</button>
+        </div>
+
+        <div class="pattern-card">
+            <h3>Sine Wave (Horizontal)</h3>
+            <p>Wave pattern across the array</p>
+            <canvas id="sine-horizontal"></canvas>
+            <button onclick="download('sine-horizontal')">Download PNG</button>
+        </div>
+
+        <div class="pattern-card">
+            <h3>Sine Wave (Vertical)</h3>
+            <p>Wave pattern along each rib's height</p>
+            <canvas id="sine-vertical"></canvas>
+            <button onclick="download('sine-vertical')">Download PNG</button>
+        </div>
+
+        <div class="pattern-card">
+            <h3>Diagonal Waves</h3>
+            <p>Flowing diagonal pattern across array</p>
+            <canvas id="diagonal-waves"></canvas>
+            <button onclick="download('diagonal-waves')">Download PNG</button>
+        </div>
+
+        <div class="pattern-card">
+            <h3>Checkerboard</h3>
+            <p>Blocky alternating pattern</p>
+            <canvas id="checkerboard"></canvas>
+            <button onclick="download('checkerboard')">Download PNG</button>
+        </div>
+
+        <div class="pattern-card">
+            <h3>Horizontal Stripes</h3>
+            <p>Creates horizontal bands across all ribs</p>
+            <canvas id="h-stripes"></canvas>
+            <button onclick="download('h-stripes')">Download PNG</button>
+        </div>
+
+        <div class="pattern-card">
+            <h3>Vertical Stripes</h3>
+            <p>Each rib alternates deep/shallow</p>
+            <canvas id="v-stripes"></canvas>
+            <button onclick="download('v-stripes')">Download PNG</button>
+        </div>
+
+        <div class="pattern-card">
+            <h3>Mountain Silhouette</h3>
+            <p>Mountain range profile across array</p>
+            <canvas id="mountains"></canvas>
+            <button onclick="download('mountains')">Download PNG</button>
+        </div>
+
+        <div class="pattern-card">
+            <h3>City Skyline</h3>
+            <p>Urban building silhouette</p>
+            <canvas id="skyline"></canvas>
+            <button onclick="download('skyline')">Download PNG</button>
+        </div>
+
+        <div class="pattern-card">
+            <h3>Noise Pattern</h3>
+            <p>Organic random variation - natural look</p>
+            <canvas id="noise"></canvas>
+            <button onclick="download('noise')">Download PNG</button>
+        </div>
+
+        <div class="pattern-card">
+            <h3>Smooth Noise</h3>
+            <p>Perlin-like smooth organic pattern</p>
+            <canvas id="smooth-noise"></canvas>
+            <button onclick="download('smooth-noise')">Download PNG</button>
+        </div>
+
+        <div class="pattern-card">
+            <h3>Diamond Pattern</h3>
+            <p>Geometric diamond shapes</p>
+            <canvas id="diamonds"></canvas>
+            <button onclick="download('diamonds')">Download PNG</button>
+        </div>
+
+        <div class="pattern-card">
+            <h3>Circular Rings</h3>
+            <p>Concentric circles from center</p>
+            <canvas id="rings"></canvas>
+            <button onclick="download('rings')">Download PNG</button>
+        </div>
+    </div>
+
+    <script>
+        const W = 512;
+        const H = 256;
+
+        function createCanvas(id) {
+            const canvas = document.getElementById(id);
+            canvas.width = W;
+            canvas.height = H;
+            return canvas.getContext('2d');
+        }
+
+        // Horizontal Gradient
+        (function() {
+            const ctx = createCanvas('horizontal-gradient');
+            const grad = ctx.createLinearGradient(0, 0, W, 0);
+            grad.addColorStop(0, '#000');
+            grad.addColorStop(1, '#fff');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, W, H);
+        })();
+
+        // Vertical Gradient
+        (function() {
+            const ctx = createCanvas('vertical-gradient');
+            const grad = ctx.createLinearGradient(0, H, 0, 0);
+            grad.addColorStop(0, '#000');
+            grad.addColorStop(1, '#fff');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, W, H);
+        })();
+
+        // Center Gradient
+        (function() {
+            const ctx = createCanvas('center-gradient');
+            const grad = ctx.createLinearGradient(0, 0, W, 0);
+            grad.addColorStop(0, '#000');
+            grad.addColorStop(0.5, '#fff');
+            grad.addColorStop(1, '#000');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, W, H);
+        })();
+
+        // Radial Gradient
+        (function() {
+            const ctx = createCanvas('radial-gradient');
+            const grad = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, H);
+            grad.addColorStop(0, '#fff');
+            grad.addColorStop(1, '#000');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, W, H);
+        })();
+
+        // Sine Wave Horizontal
+        (function() {
+            const ctx = createCanvas('sine-horizontal');
+            const imageData = ctx.createImageData(W, H);
+            for (let x = 0; x < W; x++) {
+                const v = Math.sin(x / W * Math.PI * 4) * 0.5 + 0.5;
+                const c = Math.floor(v * 255);
+                for (let y = 0; y < H; y++) {
+                    const i = (y * W + x) * 4;
+                    imageData.data[i] = c;
+                    imageData.data[i+1] = c;
+                    imageData.data[i+2] = c;
+                    imageData.data[i+3] = 255;
+                }
+            }
+            ctx.putImageData(imageData, 0, 0);
+        })();
+
+        // Sine Wave Vertical
+        (function() {
+            const ctx = createCanvas('sine-vertical');
+            const imageData = ctx.createImageData(W, H);
+            for (let y = 0; y < H; y++) {
+                const v = Math.sin((1 - y/H) * Math.PI * 3) * 0.5 + 0.5;
+                const c = Math.floor(v * 255);
+                for (let x = 0; x < W; x++) {
+                    const i = (y * W + x) * 4;
+                    imageData.data[i] = c;
+                    imageData.data[i+1] = c;
+                    imageData.data[i+2] = c;
+                    imageData.data[i+3] = 255;
+                }
+            }
+            ctx.putImageData(imageData, 0, 0);
+        })();
+
+        // Diagonal Waves
+        (function() {
+            const ctx = createCanvas('diagonal-waves');
+            const imageData = ctx.createImageData(W, H);
+            for (let y = 0; y < H; y++) {
+                for (let x = 0; x < W; x++) {
+                    const v = Math.sin((x/W + (1-y/H)) * Math.PI * 4) * 0.5 + 0.5;
+                    const c = Math.floor(v * 255);
+                    const i = (y * W + x) * 4;
+                    imageData.data[i] = c;
+                    imageData.data[i+1] = c;
+                    imageData.data[i+2] = c;
+                    imageData.data[i+3] = 255;
+                }
+            }
+            ctx.putImageData(imageData, 0, 0);
+        })();
+
+        // Checkerboard
+        (function() {
+            const ctx = createCanvas('checkerboard');
+            const size = 32;
+            for (let y = 0; y < H; y += size) {
+                for (let x = 0; x < W; x += size) {
+                    const isWhite = ((x/size) + (y/size)) % 2 === 0;
+                    ctx.fillStyle = isWhite ? '#fff' : '#000';
+                    ctx.fillRect(x, y, size, size);
+                }
+            }
+        })();
+
+        // Horizontal Stripes
+        (function() {
+            const ctx = createCanvas('h-stripes');
+            const stripeH = 32;
+            for (let y = 0; y < H; y += stripeH) {
+                ctx.fillStyle = (y / stripeH) % 2 === 0 ? '#fff' : '#000';
+                ctx.fillRect(0, y, W, stripeH);
+            }
+        })();
+
+        // Vertical Stripes
+        (function() {
+            const ctx = createCanvas('v-stripes');
+            const stripeW = 32;
+            for (let x = 0; x < W; x += stripeW) {
+                ctx.fillStyle = (x / stripeW) % 2 === 0 ? '#fff' : '#000';
+                ctx.fillRect(x, 0, stripeW, H);
+            }
+        })();
+
+        // Mountains
+        (function() {
+            const ctx = createCanvas('mountains');
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, W, H);
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.moveTo(0, H);
+
+            // Generate mountain peaks
+            const peaks = [
+                {x: 0, y: H * 0.7},
+                {x: W * 0.15, y: H * 0.3},
+                {x: W * 0.25, y: H * 0.5},
+                {x: W * 0.4, y: H * 0.15},
+                {x: W * 0.55, y: H * 0.45},
+                {x: W * 0.65, y: H * 0.25},
+                {x: W * 0.8, y: H * 0.4},
+                {x: W * 0.9, y: H * 0.2},
+                {x: W, y: H * 0.5}
+            ];
+
+            peaks.forEach(p => ctx.lineTo(p.x, p.y));
+            ctx.lineTo(W, H);
+            ctx.closePath();
+            ctx.fill();
+        })();
+
+        // City Skyline
+        (function() {
+            const ctx = createCanvas('skyline');
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, W, H);
+            ctx.fillStyle = '#fff';
+
+            // Generate buildings
+            let x = 0;
+            while (x < W) {
+                const bw = 20 + Math.random() * 40;
+                const bh = 50 + Math.random() * 150;
+                ctx.fillRect(x, H - bh, bw - 2, bh);
+                x += bw;
+            }
+        })();
+
+        // Noise Pattern
+        (function() {
+            const ctx = createCanvas('noise');
+            const imageData = ctx.createImageData(W, H);
+            for (let i = 0; i < imageData.data.length; i += 4) {
+                const c = Math.floor(Math.random() * 255);
+                imageData.data[i] = c;
+                imageData.data[i+1] = c;
+                imageData.data[i+2] = c;
+                imageData.data[i+3] = 255;
+            }
+            ctx.putImageData(imageData, 0, 0);
+        })();
+
+        // Smooth Noise (simple interpolated)
+        (function() {
+            const ctx = createCanvas('smooth-noise');
+            const imageData = ctx.createImageData(W, H);
+
+            // Generate low-res noise
+            const scale = 32;
+            const noiseW = Math.ceil(W / scale) + 1;
+            const noiseH = Math.ceil(H / scale) + 1;
+            const noise = [];
+            for (let i = 0; i < noiseW * noiseH; i++) {
+                noise.push(Math.random());
+            }
+
+            // Interpolate
+            for (let y = 0; y < H; y++) {
+                for (let x = 0; x < W; x++) {
+                    const nx = x / scale;
+                    const ny = y / scale;
+                    const x0 = Math.floor(nx);
+                    const y0 = Math.floor(ny);
+                    const x1 = x0 + 1;
+                    const y1 = y0 + 1;
+                    const fx = nx - x0;
+                    const fy = ny - y0;
+
+                    const n00 = noise[y0 * noiseW + x0];
+                    const n10 = noise[y0 * noiseW + x1];
+                    const n01 = noise[y1 * noiseW + x0];
+                    const n11 = noise[y1 * noiseW + x1];
+
+                    const nx0 = n00 * (1-fx) + n10 * fx;
+                    const nx1 = n01 * (1-fx) + n11 * fx;
+                    const v = nx0 * (1-fy) + nx1 * fy;
+
+                    const c = Math.floor(v * 255);
+                    const i = (y * W + x) * 4;
+                    imageData.data[i] = c;
+                    imageData.data[i+1] = c;
+                    imageData.data[i+2] = c;
+                    imageData.data[i+3] = 255;
+                }
+            }
+            ctx.putImageData(imageData, 0, 0);
+        })();
+
+        // Diamonds
+        (function() {
+            const ctx = createCanvas('diamonds');
+            const imageData = ctx.createImageData(W, H);
+            const size = 64;
+            for (let y = 0; y < H; y++) {
+                for (let x = 0; x < W; x++) {
+                    const dx = Math.abs((x % size) - size/2);
+                    const dy = Math.abs((y % size) - size/2);
+                    const v = (dx + dy) < size/2 ? 1 : 0;
+                    const c = v * 255;
+                    const i = (y * W + x) * 4;
+                    imageData.data[i] = c;
+                    imageData.data[i+1] = c;
+                    imageData.data[i+2] = c;
+                    imageData.data[i+3] = 255;
+                }
+            }
+            ctx.putImageData(imageData, 0, 0);
+        })();
+
+        // Circular Rings
+        (function() {
+            const ctx = createCanvas('rings');
+            const imageData = ctx.createImageData(W, H);
+            const cx = W / 2;
+            const cy = H / 2;
+            for (let y = 0; y < H; y++) {
+                for (let x = 0; x < W; x++) {
+                    const dist = Math.sqrt((x-cx)**2 + (y-cy)**2);
+                    const v = Math.sin(dist / 20) * 0.5 + 0.5;
+                    const c = Math.floor(v * 255);
+                    const i = (y * W + x) * 4;
+                    imageData.data[i] = c;
+                    imageData.data[i+1] = c;
+                    imageData.data[i+2] = c;
+                    imageData.data[i+3] = 255;
+                }
+            }
+            ctx.putImageData(imageData, 0, 0);
+        })();
+
+        function download(id) {
+            const canvas = document.getElementById(id);
+            const link = document.createElement('a');
+            link.download = id + '.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+</body>
+</html>
