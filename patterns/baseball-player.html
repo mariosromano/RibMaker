@@ -13,10 +13,10 @@
             text-align: center;
         }
         h1 { margin-bottom: 10px; }
-        p { color: #888; margin-bottom: 20px; }
+        p { color: #888; margin-bottom: 30px; }
         .patterns {
             display: flex;
-            gap: 30px;
+            gap: 40px;
             justify-content: center;
             flex-wrap: wrap;
         }
@@ -38,6 +38,7 @@
             border-radius: 8px;
             display: block;
             margin-bottom: 12px;
+            background: #000;
         }
         button {
             padding: 12px 24px;
@@ -54,260 +55,502 @@
 </head>
 <body>
     <h1>Baseball Player Patterns</h1>
-    <p>Silhouette patterns optimized for the M|R Walls Rib Maker</p>
+    <p>Vertical silhouettes optimized for the M|R Walls Rib Maker</p>
 
     <div class="patterns">
         <div class="pattern-card">
-            <h3>Batter (White on Black)</h3>
+            <h3>Batter - Stance</h3>
             <p class="desc">Player extends OUT from wall</p>
-            <canvas id="batter-white" width="512" height="256"></canvas>
-            <button onclick="download('batter-white')">Download PNG</button>
+            <canvas id="batter-stance" width="200" height="400"></canvas>
+            <button onclick="download('batter-stance')">Download PNG</button>
         </div>
 
         <div class="pattern-card">
-            <h3>Batter (Black on White)</h3>
-            <p class="desc">Player recessed INTO wall</p>
-            <canvas id="batter-black" width="512" height="256"></canvas>
-            <button onclick="download('batter-black')">Download PNG</button>
+            <h3>Batter - Swing</h3>
+            <p class="desc">Mid-swing action pose</p>
+            <canvas id="batter-swing" width="220" height="400"></canvas>
+            <button onclick="download('batter-swing')">Download PNG</button>
         </div>
 
         <div class="pattern-card">
-            <h3>Pitcher (White on Black)</h3>
-            <p class="desc">Pitcher in wind-up extends OUT</p>
-            <canvas id="pitcher-white" width="512" height="256"></canvas>
-            <button onclick="download('pitcher-white')">Download PNG</button>
+            <h3>Pitcher - Wind Up</h3>
+            <p class="desc">Classic wind-up pose</p>
+            <canvas id="pitcher-windup" width="180" height="400"></canvas>
+            <button onclick="download('pitcher-windup')">Download PNG</button>
         </div>
 
         <div class="pattern-card">
-            <h3>Pitcher (Black on White)</h3>
-            <p class="desc">Pitcher recessed INTO wall</p>
-            <canvas id="pitcher-black" width="512" height="256"></canvas>
-            <button onclick="download('pitcher-black')">Download PNG</button>
+            <h3>Pitcher - Throwing</h3>
+            <p class="desc">Release point action</p>
+            <canvas id="pitcher-throw" width="240" height="400"></canvas>
+            <button onclick="download('pitcher-throw')">Download PNG</button>
         </div>
     </div>
 
     <script>
-        function drawBatter(ctx, W, H, fillColor, bgColor) {
-            // Background
-            ctx.fillStyle = bgColor;
+        function drawRealisticBatterStance(ctx, W, H) {
+            ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, W, H);
 
-            ctx.fillStyle = fillColor;
-            ctx.strokeStyle = fillColor;
-            ctx.lineWidth = 2;
+            ctx.fillStyle = '#fff';
+            ctx.strokeStyle = '#fff';
 
-            // Scale and center
-            const scale = H * 0.85;
-            const centerX = W * 0.5;
-            const baseY = H * 0.92;
+            const cx = W * 0.5;
+            const baseY = H * 0.95;
+            const scale = H * 0.9;
 
             ctx.save();
-            ctx.translate(centerX, baseY);
+            ctx.translate(cx, baseY);
 
-            // Draw batter silhouette (batting stance, about to swing)
+            // More realistic batter in stance
             ctx.beginPath();
 
-            // Head
-            ctx.arc(0, -scale * 0.85, scale * 0.08, 0, Math.PI * 2);
+            // Head with helmet - rounder, more realistic
+            ctx.moveTo(-scale * 0.04, -scale * 0.91);
+            ctx.bezierCurveTo(
+                -scale * 0.08, -scale * 0.95,
+                -scale * 0.08, -scale * 1.0,
+                -scale * 0.02, -scale * 1.02
+            );
+            ctx.bezierCurveTo(
+                scale * 0.04, -scale * 1.03,
+                scale * 0.08, -scale * 0.98,
+                scale * 0.06, -scale * 0.92
+            );
+            ctx.bezierCurveTo(
+                scale * 0.05, -scale * 0.88,
+                -scale * 0.02, -scale * 0.87,
+                -scale * 0.04, -scale * 0.91
+            );
             ctx.fill();
 
             // Helmet brim
             ctx.beginPath();
-            ctx.ellipse(-scale * 0.02, -scale * 0.88, scale * 0.1, scale * 0.03, -0.3, 0, Math.PI * 2);
+            ctx.ellipse(scale * 0.06, -scale * 0.94, scale * 0.06, scale * 0.015, 0.2, 0, Math.PI * 2);
             ctx.fill();
 
-            // Body/torso
+            // Neck
+            ctx.fillRect(-scale * 0.025, -scale * 0.88, scale * 0.05, scale * 0.04);
+
+            // Shoulders and upper torso - athletic build
             ctx.beginPath();
-            ctx.moveTo(-scale * 0.06, -scale * 0.76);
-            ctx.lineTo(scale * 0.08, -scale * 0.74);
-            ctx.lineTo(scale * 0.12, -scale * 0.45);
-            ctx.lineTo(-scale * 0.1, -scale * 0.42);
+            ctx.moveTo(-scale * 0.12, -scale * 0.84);
+            ctx.bezierCurveTo(
+                -scale * 0.14, -scale * 0.82,
+                -scale * 0.13, -scale * 0.75,
+                -scale * 0.11, -scale * 0.65
+            );
+            ctx.lineTo(-scale * 0.08, -scale * 0.5);
+            ctx.lineTo(scale * 0.06, -scale * 0.48);
+            ctx.lineTo(scale * 0.1, -scale * 0.65);
+            ctx.bezierCurveTo(
+                scale * 0.12, -scale * 0.75,
+                scale * 0.12, -scale * 0.82,
+                scale * 0.1, -scale * 0.84
+            );
             ctx.closePath();
             ctx.fill();
 
-            // Back leg (stance)
+            // Back arm (bent, hands up holding bat)
             ctx.beginPath();
-            ctx.moveTo(-scale * 0.08, -scale * 0.42);
-            ctx.lineTo(-scale * 0.18, -scale * 0.22);
-            ctx.lineTo(-scale * 0.22, 0);
-            ctx.lineTo(-scale * 0.14, 0);
-            ctx.lineTo(-scale * 0.12, -scale * 0.2);
-            ctx.lineTo(-scale * 0.02, -scale * 0.4);
-            ctx.closePath();
-            ctx.fill();
-
-            // Front leg (bent)
-            ctx.beginPath();
-            ctx.moveTo(scale * 0.06, -scale * 0.42);
-            ctx.lineTo(scale * 0.2, -scale * 0.25);
-            ctx.lineTo(scale * 0.15, 0);
-            ctx.lineTo(scale * 0.23, 0);
-            ctx.lineTo(scale * 0.28, -scale * 0.22);
-            ctx.lineTo(scale * 0.14, -scale * 0.4);
-            ctx.closePath();
-            ctx.fill();
-
-            // Back arm (holding bat)
-            ctx.beginPath();
-            ctx.moveTo(-scale * 0.04, -scale * 0.72);
-            ctx.lineTo(-scale * 0.15, -scale * 0.68);
-            ctx.lineTo(-scale * 0.22, -scale * 0.8);
-            ctx.lineTo(-scale * 0.18, -scale * 0.82);
-            ctx.lineTo(-scale * 0.12, -scale * 0.72);
-            ctx.lineTo(-scale * 0.02, -scale * 0.74);
-            ctx.closePath();
+            ctx.moveTo(-scale * 0.12, -scale * 0.82);
+            ctx.bezierCurveTo(
+                -scale * 0.18, -scale * 0.8,
+                -scale * 0.2, -scale * 0.75,
+                -scale * 0.18, -scale * 0.7
+            );
+            ctx.bezierCurveTo(
+                -scale * 0.16, -scale * 0.68,
+                -scale * 0.12, -scale * 0.72,
+                -scale * 0.08, -scale * 0.78
+            );
+            ctx.bezierCurveTo(
+                -scale * 0.06, -scale * 0.82,
+                -scale * 0.08, -scale * 0.84,
+                -scale * 0.12, -scale * 0.82
+            );
             ctx.fill();
 
             // Front arm
             ctx.beginPath();
-            ctx.moveTo(scale * 0.06, -scale * 0.7);
-            ctx.lineTo(scale * 0.02, -scale * 0.58);
-            ctx.lineTo(-scale * 0.1, -scale * 0.65);
-            ctx.lineTo(-scale * 0.08, -scale * 0.7);
-            ctx.lineTo(scale * 0.02, -scale * 0.64);
-            ctx.lineTo(scale * 0.08, -scale * 0.72);
+            ctx.moveTo(scale * 0.08, -scale * 0.82);
+            ctx.bezierCurveTo(
+                scale * 0.04, -scale * 0.78,
+                -scale * 0.02, -scale * 0.76,
+                -scale * 0.06, -scale * 0.72
+            );
+            ctx.bezierCurveTo(
+                -scale * 0.04, -scale * 0.7,
+                scale * 0.02, -scale * 0.72,
+                scale * 0.06, -scale * 0.76
+            );
+            ctx.bezierCurveTo(
+                scale * 0.1, -scale * 0.78,
+                scale * 0.1, -scale * 0.82,
+                scale * 0.08, -scale * 0.82
+            );
+            ctx.fill();
+
+            // Hands grip area
+            ctx.beginPath();
+            ctx.arc(-scale * 0.1, -scale * 0.74, scale * 0.045, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Hips/waist
+            ctx.beginPath();
+            ctx.moveTo(-scale * 0.08, -scale * 0.5);
+            ctx.lineTo(-scale * 0.1, -scale * 0.42);
+            ctx.lineTo(scale * 0.08, -scale * 0.4);
+            ctx.lineTo(scale * 0.06, -scale * 0.48);
             ctx.closePath();
             ctx.fill();
 
-            // Bat
-            ctx.lineWidth = scale * 0.035;
-            ctx.lineCap = 'round';
+            // Back leg - athletic stance
             ctx.beginPath();
-            ctx.moveTo(-scale * 0.2, -scale * 0.81);
-            ctx.lineTo(scale * 0.25, -scale * 1.05);
-            ctx.stroke();
-
-            // Bat knob
-            ctx.beginPath();
-            ctx.arc(-scale * 0.22, -scale * 0.8, scale * 0.025, 0, Math.PI * 2);
+            ctx.moveTo(-scale * 0.1, -scale * 0.42);
+            ctx.bezierCurveTo(
+                -scale * 0.14, -scale * 0.35,
+                -scale * 0.16, -scale * 0.25,
+                -scale * 0.14, -scale * 0.15
+            );
+            ctx.lineTo(-scale * 0.12, 0);
+            ctx.lineTo(-scale * 0.04, 0);
+            ctx.lineTo(-scale * 0.06, -scale * 0.14);
+            ctx.bezierCurveTo(
+                -scale * 0.06, -scale * 0.25,
+                -scale * 0.04, -scale * 0.35,
+                -scale * 0.02, -scale * 0.4
+            );
+            ctx.closePath();
             ctx.fill();
 
-            // Bat barrel (thicker end)
-            ctx.lineWidth = scale * 0.055;
+            // Front leg - bent in stance
             ctx.beginPath();
-            ctx.moveTo(scale * 0.15, -scale * 0.98);
-            ctx.lineTo(scale * 0.28, -scale * 1.08);
+            ctx.moveTo(scale * 0.04, -scale * 0.4);
+            ctx.bezierCurveTo(
+                scale * 0.1, -scale * 0.32,
+                scale * 0.14, -scale * 0.22,
+                scale * 0.12, -scale * 0.12
+            );
+            ctx.lineTo(scale * 0.1, 0);
+            ctx.lineTo(scale * 0.18, 0);
+            ctx.lineTo(scale * 0.2, -scale * 0.1);
+            ctx.bezierCurveTo(
+                scale * 0.22, -scale * 0.2,
+                scale * 0.18, -scale * 0.32,
+                scale * 0.12, -scale * 0.38
+            );
+            ctx.closePath();
+            ctx.fill();
+
+            // Bat - angled behind head
+            ctx.lineWidth = scale * 0.025;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(-scale * 0.12, -scale * 0.76);
+            ctx.lineTo(scale * 0.08, -scale * 1.1);
+            ctx.stroke();
+
+            // Bat barrel (thicker)
+            ctx.lineWidth = scale * 0.04;
+            ctx.beginPath();
+            ctx.moveTo(scale * 0.02, -scale * 1.02);
+            ctx.lineTo(scale * 0.1, -scale * 1.14);
             ctx.stroke();
 
             ctx.restore();
         }
 
-        function drawPitcher(ctx, W, H, fillColor, bgColor) {
-            // Background
-            ctx.fillStyle = bgColor;
+        function drawRealisticBatterSwing(ctx, W, H) {
+            ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, W, H);
 
-            ctx.fillStyle = fillColor;
-            ctx.strokeStyle = fillColor;
-            ctx.lineWidth = 2;
+            ctx.fillStyle = '#fff';
+            ctx.strokeStyle = '#fff';
 
-            // Scale and center
-            const scale = H * 0.85;
-            const centerX = W * 0.5;
+            const cx = W * 0.45;
             const baseY = H * 0.95;
+            const scale = H * 0.88;
 
             ctx.save();
-            ctx.translate(centerX, baseY);
-
-            // Draw pitcher silhouette (wind-up position, leg raised)
-            ctx.beginPath();
+            ctx.translate(cx, baseY);
 
             // Head
-            ctx.arc(-scale * 0.05, -scale * 0.88, scale * 0.07, 0, Math.PI * 2);
+            ctx.beginPath();
+            ctx.arc(scale * 0.02, -scale * 0.92, scale * 0.055, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Helmet
+            ctx.beginPath();
+            ctx.ellipse(scale * 0.02, -scale * 0.95, scale * 0.065, scale * 0.04, 0, Math.PI, Math.PI * 2);
+            ctx.fill();
+
+            // Torso - rotated in swing
+            ctx.beginPath();
+            ctx.moveTo(-scale * 0.06, -scale * 0.85);
+            ctx.bezierCurveTo(-scale * 0.1, -scale * 0.78, -scale * 0.1, -scale * 0.6, -scale * 0.06, -scale * 0.48);
+            ctx.lineTo(scale * 0.08, -scale * 0.46);
+            ctx.bezierCurveTo(scale * 0.12, -scale * 0.58, scale * 0.12, -scale * 0.76, scale * 0.08, -scale * 0.84);
+            ctx.closePath();
+            ctx.fill();
+
+            // Arms extended in swing
+            ctx.beginPath();
+            ctx.moveTo(scale * 0.06, -scale * 0.8);
+            ctx.bezierCurveTo(scale * 0.14, -scale * 0.75, scale * 0.22, -scale * 0.7, scale * 0.28, -scale * 0.68);
+            ctx.bezierCurveTo(scale * 0.3, -scale * 0.65, scale * 0.28, -scale * 0.62, scale * 0.24, -scale * 0.64);
+            ctx.bezierCurveTo(scale * 0.18, -scale * 0.66, scale * 0.1, -scale * 0.72, scale * 0.04, -scale * 0.76);
+            ctx.closePath();
+            ctx.fill();
+
+            // Hands
+            ctx.beginPath();
+            ctx.arc(scale * 0.28, -scale * 0.66, scale * 0.035, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Hips
+            ctx.beginPath();
+            ctx.moveTo(-scale * 0.06, -scale * 0.48);
+            ctx.lineTo(-scale * 0.08, -scale * 0.38);
+            ctx.lineTo(scale * 0.1, -scale * 0.36);
+            ctx.lineTo(scale * 0.08, -scale * 0.46);
+            ctx.closePath();
+            ctx.fill();
+
+            // Back leg
+            ctx.beginPath();
+            ctx.moveTo(-scale * 0.06, -scale * 0.38);
+            ctx.bezierCurveTo(-scale * 0.12, -scale * 0.28, -scale * 0.14, -scale * 0.15, -scale * 0.1, 0);
+            ctx.lineTo(-scale * 0.02, 0);
+            ctx.bezierCurveTo(-scale * 0.04, -scale * 0.12, -scale * 0.02, -scale * 0.26, scale * 0.02, -scale * 0.36);
+            ctx.closePath();
+            ctx.fill();
+
+            // Front leg - pivoting
+            ctx.beginPath();
+            ctx.moveTo(scale * 0.06, -scale * 0.36);
+            ctx.bezierCurveTo(scale * 0.12, -scale * 0.26, scale * 0.16, -scale * 0.14, scale * 0.14, 0);
+            ctx.lineTo(scale * 0.22, 0);
+            ctx.bezierCurveTo(scale * 0.24, -scale * 0.12, scale * 0.2, -scale * 0.26, scale * 0.14, -scale * 0.36);
+            ctx.closePath();
+            ctx.fill();
+
+            // Bat - horizontal swing
+            ctx.lineWidth = scale * 0.022;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(scale * 0.26, -scale * 0.67);
+            ctx.lineTo(scale * 0.52, -scale * 0.58);
+            ctx.stroke();
+
+            ctx.lineWidth = scale * 0.038;
+            ctx.beginPath();
+            ctx.moveTo(scale * 0.42, -scale * 0.61);
+            ctx.lineTo(scale * 0.56, -scale * 0.56);
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        function drawRealisticPitcherWindup(ctx, W, H) {
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, W, H);
+
+            ctx.fillStyle = '#fff';
+            ctx.strokeStyle = '#fff';
+
+            const cx = W * 0.5;
+            const baseY = H * 0.95;
+            const scale = H * 0.88;
+
+            ctx.save();
+            ctx.translate(cx, baseY);
+
+            // Head
+            ctx.beginPath();
+            ctx.arc(-scale * 0.02, -scale * 0.92, scale * 0.05, 0, Math.PI * 2);
             ctx.fill();
 
             // Cap
             ctx.beginPath();
-            ctx.ellipse(-scale * 0.05, -scale * 0.92, scale * 0.08, scale * 0.025, 0, 0, Math.PI, true);
+            ctx.ellipse(-scale * 0.02, -scale * 0.95, scale * 0.06, scale * 0.025, 0, Math.PI, Math.PI * 2);
             ctx.fill();
-            ctx.fillRect(-scale * 0.13, -scale * 0.93, scale * 0.16, scale * 0.015);
+            ctx.fillRect(-scale * 0.08, -scale * 0.96, scale * 0.12, scale * 0.015);
 
-            // Torso (leaning back)
+            // Torso - leaning back
+            ctx.beginPath();
+            ctx.moveTo(-scale * 0.08, -scale * 0.86);
+            ctx.bezierCurveTo(-scale * 0.12, -scale * 0.78, -scale * 0.12, -scale * 0.6, -scale * 0.08, -scale * 0.46);
+            ctx.lineTo(scale * 0.06, -scale * 0.44);
+            ctx.bezierCurveTo(scale * 0.1, -scale * 0.58, scale * 0.1, -scale * 0.76, scale * 0.06, -scale * 0.84);
+            ctx.closePath();
+            ctx.fill();
+
+            // Glove arm - tucked
             ctx.beginPath();
             ctx.moveTo(-scale * 0.1, -scale * 0.8);
-            ctx.lineTo(scale * 0.02, -scale * 0.78);
-            ctx.lineTo(scale * 0.08, -scale * 0.48);
-            ctx.lineTo(-scale * 0.12, -scale * 0.45);
-            ctx.closePath();
-            ctx.fill();
-
-            // Plant leg (straight, on ground)
-            ctx.beginPath();
-            ctx.moveTo(-scale * 0.08, -scale * 0.45);
-            ctx.lineTo(-scale * 0.15, -scale * 0.22);
-            ctx.lineTo(-scale * 0.12, 0);
-            ctx.lineTo(-scale * 0.04, 0);
-            ctx.lineTo(-scale * 0.06, -scale * 0.2);
-            ctx.lineTo(0, -scale * 0.42);
-            ctx.closePath();
-            ctx.fill();
-
-            // Raised leg (knee up)
-            ctx.beginPath();
-            ctx.moveTo(scale * 0.04, -scale * 0.45);
-            ctx.lineTo(scale * 0.18, -scale * 0.5);
-            ctx.lineTo(scale * 0.22, -scale * 0.35);
-            ctx.lineTo(scale * 0.12, -scale * 0.28);
-            ctx.lineTo(scale * 0.08, -scale * 0.42);
-            ctx.closePath();
-            ctx.fill();
-
-            // Lower raised leg
-            ctx.beginPath();
-            ctx.moveTo(scale * 0.18, -scale * 0.42);
-            ctx.lineTo(scale * 0.2, -scale * 0.32);
-            ctx.lineTo(scale * 0.12, -scale * 0.28);
-            ctx.lineTo(scale * 0.08, -scale * 0.25);
-            ctx.lineTo(scale * 0.16, -scale * 0.22);
-            ctx.lineTo(scale * 0.25, -scale * 0.38);
-            ctx.closePath();
-            ctx.fill();
-
-            // Glove arm (extended back)
-            ctx.beginPath();
-            ctx.moveTo(-scale * 0.08, -scale * 0.75);
-            ctx.lineTo(-scale * 0.25, -scale * 0.7);
-            ctx.lineTo(-scale * 0.32, -scale * 0.65);
-            ctx.lineTo(-scale * 0.3, -scale * 0.6);
-            ctx.lineTo(-scale * 0.22, -scale * 0.65);
-            ctx.lineTo(-scale * 0.06, -scale * 0.7);
+            ctx.bezierCurveTo(-scale * 0.16, -scale * 0.72, -scale * 0.14, -scale * 0.62, -scale * 0.1, -scale * 0.58);
+            ctx.bezierCurveTo(-scale * 0.06, -scale * 0.6, -scale * 0.06, -scale * 0.7, -scale * 0.08, -scale * 0.78);
             ctx.closePath();
             ctx.fill();
 
             // Glove
             ctx.beginPath();
-            ctx.arc(-scale * 0.34, -scale * 0.62, scale * 0.06, 0, Math.PI * 2);
+            ctx.arc(-scale * 0.12, -scale * 0.58, scale * 0.045, 0, Math.PI * 2);
             ctx.fill();
 
-            // Throwing arm (back, holding ball)
+            // Throwing arm - back
             ctx.beginPath();
-            ctx.moveTo(0, -scale * 0.76);
-            ctx.lineTo(scale * 0.12, -scale * 0.82);
-            ctx.lineTo(scale * 0.2, -scale * 0.95);
-            ctx.lineTo(scale * 0.16, -scale * 0.98);
-            ctx.lineTo(scale * 0.1, -scale * 0.86);
-            ctx.lineTo(0, -scale * 0.8);
+            ctx.moveTo(scale * 0.04, -scale * 0.82);
+            ctx.bezierCurveTo(scale * 0.1, -scale * 0.86, scale * 0.14, -scale * 0.92, scale * 0.12, -scale * 0.98);
+            ctx.bezierCurveTo(scale * 0.08, -scale * 1.0, scale * 0.04, -scale * 0.94, scale * 0.02, -scale * 0.86);
             ctx.closePath();
             ctx.fill();
 
-            // Hand with ball
+            // Ball hand
             ctx.beginPath();
-            ctx.arc(scale * 0.19, -scale * 0.98, scale * 0.035, 0, Math.PI * 2);
+            ctx.arc(scale * 0.12, -scale * 1.0, scale * 0.03, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Hips
+            ctx.beginPath();
+            ctx.moveTo(-scale * 0.08, -scale * 0.46);
+            ctx.lineTo(-scale * 0.08, -scale * 0.38);
+            ctx.lineTo(scale * 0.06, -scale * 0.36);
+            ctx.lineTo(scale * 0.06, -scale * 0.44);
+            ctx.closePath();
+            ctx.fill();
+
+            // Plant leg
+            ctx.beginPath();
+            ctx.moveTo(-scale * 0.06, -scale * 0.38);
+            ctx.bezierCurveTo(-scale * 0.1, -scale * 0.26, -scale * 0.1, -scale * 0.12, -scale * 0.06, 0);
+            ctx.lineTo(scale * 0.02, 0);
+            ctx.bezierCurveTo(scale * 0.0, -scale * 0.1, -scale * 0.02, -scale * 0.24, scale * 0.0, -scale * 0.36);
+            ctx.closePath();
+            ctx.fill();
+
+            // Raised leg - knee up high
+            ctx.beginPath();
+            ctx.moveTo(scale * 0.04, -scale * 0.38);
+            ctx.bezierCurveTo(scale * 0.1, -scale * 0.42, scale * 0.14, -scale * 0.5, scale * 0.12, -scale * 0.56);
+            ctx.bezierCurveTo(scale * 0.08, -scale * 0.58, scale * 0.04, -scale * 0.52, scale * 0.02, -scale * 0.44);
+            ctx.closePath();
+            ctx.fill();
+
+            // Lower raised leg
+            ctx.beginPath();
+            ctx.moveTo(scale * 0.1, -scale * 0.54);
+            ctx.bezierCurveTo(scale * 0.08, -scale * 0.46, scale * 0.06, -scale * 0.38, scale * 0.08, -scale * 0.32);
+            ctx.bezierCurveTo(scale * 0.12, -scale * 0.34, scale * 0.14, -scale * 0.42, scale * 0.14, -scale * 0.5);
+            ctx.closePath();
+            ctx.fill();
+
+            // Foot
+            ctx.beginPath();
+            ctx.ellipse(scale * 0.1, -scale * 0.3, scale * 0.04, scale * 0.02, 0.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        function drawRealisticPitcherThrow(ctx, W, H) {
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, W, H);
+
+            ctx.fillStyle = '#fff';
+            ctx.strokeStyle = '#fff';
+
+            const cx = W * 0.4;
+            const baseY = H * 0.95;
+            const scale = H * 0.85;
+
+            ctx.save();
+            ctx.translate(cx, baseY);
+
+            // Head - looking at target
+            ctx.beginPath();
+            ctx.arc(scale * 0.06, -scale * 0.88, scale * 0.05, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Cap
+            ctx.beginPath();
+            ctx.ellipse(scale * 0.08, -scale * 0.91, scale * 0.055, scale * 0.02, 0.3, Math.PI, Math.PI * 2);
+            ctx.fill();
+
+            // Torso - driving forward
+            ctx.beginPath();
+            ctx.moveTo(-scale * 0.02, -scale * 0.82);
+            ctx.bezierCurveTo(-scale * 0.06, -scale * 0.72, -scale * 0.04, -scale * 0.56, scale * 0.0, -scale * 0.44);
+            ctx.lineTo(scale * 0.12, -scale * 0.46);
+            ctx.bezierCurveTo(scale * 0.14, -scale * 0.58, scale * 0.14, -scale * 0.74, scale * 0.1, -scale * 0.82);
+            ctx.closePath();
+            ctx.fill();
+
+            // Glove arm - extended for balance
+            ctx.beginPath();
+            ctx.moveTo(scale * 0.08, -scale * 0.78);
+            ctx.bezierCurveTo(scale * 0.16, -scale * 0.72, scale * 0.24, -scale * 0.68, scale * 0.3, -scale * 0.66);
+            ctx.bezierCurveTo(scale * 0.32, -scale * 0.62, scale * 0.28, -scale * 0.6, scale * 0.22, -scale * 0.62);
+            ctx.bezierCurveTo(scale * 0.16, -scale * 0.66, scale * 0.1, -scale * 0.72, scale * 0.06, -scale * 0.76);
+            ctx.closePath();
+            ctx.fill();
+
+            // Glove
+            ctx.beginPath();
+            ctx.arc(scale * 0.32, -scale * 0.64, scale * 0.04, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Throwing arm - extended back at release
+            ctx.beginPath();
+            ctx.moveTo(-scale * 0.02, -scale * 0.78);
+            ctx.bezierCurveTo(-scale * 0.1, -scale * 0.82, -scale * 0.18, -scale * 0.84, -scale * 0.24, -scale * 0.82);
+            ctx.bezierCurveTo(-scale * 0.26, -scale * 0.78, -scale * 0.22, -scale * 0.76, -scale * 0.16, -scale * 0.76);
+            ctx.bezierCurveTo(-scale * 0.1, -scale * 0.76, -scale * 0.04, -scale * 0.74, scale * 0.0, -scale * 0.76);
+            ctx.closePath();
+            ctx.fill();
+
+            // Ball at release point
+            ctx.beginPath();
+            ctx.arc(-scale * 0.26, -scale * 0.8, scale * 0.025, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Hips - rotating
+            ctx.beginPath();
+            ctx.moveTo(scale * 0.0, -scale * 0.44);
+            ctx.lineTo(-scale * 0.04, -scale * 0.36);
+            ctx.lineTo(scale * 0.12, -scale * 0.34);
+            ctx.lineTo(scale * 0.12, -scale * 0.44);
+            ctx.closePath();
+            ctx.fill();
+
+            // Back leg - driving off rubber
+            ctx.beginPath();
+            ctx.moveTo(-scale * 0.02, -scale * 0.36);
+            ctx.bezierCurveTo(-scale * 0.1, -scale * 0.3, -scale * 0.16, -scale * 0.2, -scale * 0.18, -scale * 0.08);
+            ctx.lineTo(-scale * 0.22, 0);
+            ctx.lineTo(-scale * 0.14, 0);
+            ctx.bezierCurveTo(-scale * 0.12, -scale * 0.06, -scale * 0.08, -scale * 0.18, -scale * 0.02, -scale * 0.28);
+            ctx.closePath();
+            ctx.fill();
+
+            // Front leg - landing
+            ctx.beginPath();
+            ctx.moveTo(scale * 0.1, -scale * 0.34);
+            ctx.bezierCurveTo(scale * 0.18, -scale * 0.26, scale * 0.24, -scale * 0.14, scale * 0.22, 0);
+            ctx.lineTo(scale * 0.3, 0);
+            ctx.bezierCurveTo(scale * 0.32, -scale * 0.1, scale * 0.28, -scale * 0.24, scale * 0.2, -scale * 0.34);
+            ctx.closePath();
             ctx.fill();
 
             ctx.restore();
         }
 
         // Create all patterns
-        const batterWhiteCtx = document.getElementById('batter-white').getContext('2d');
-        const batterBlackCtx = document.getElementById('batter-black').getContext('2d');
-        const pitcherWhiteCtx = document.getElementById('pitcher-white').getContext('2d');
-        const pitcherBlackCtx = document.getElementById('pitcher-black').getContext('2d');
-
-        drawBatter(batterWhiteCtx, 512, 256, '#ffffff', '#000000');
-        drawBatter(batterBlackCtx, 512, 256, '#000000', '#ffffff');
-        drawPitcher(pitcherWhiteCtx, 512, 256, '#ffffff', '#000000');
-        drawPitcher(pitcherBlackCtx, 512, 256, '#000000', '#ffffff');
+        drawRealisticBatterStance(document.getElementById('batter-stance').getContext('2d'), 200, 400);
+        drawRealisticBatterSwing(document.getElementById('batter-swing').getContext('2d'), 220, 400);
+        drawRealisticPitcherWindup(document.getElementById('pitcher-windup').getContext('2d'), 180, 400);
+        drawRealisticPitcherThrow(document.getElementById('pitcher-throw').getContext('2d'), 240, 400);
 
         function download(id) {
             const canvas = document.getElementById(id);

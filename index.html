@@ -306,6 +306,134 @@
             color: #666;
             line-height: 1.5;
         }
+
+        .toggle-group {
+            display: flex;
+            gap: 4px;
+            background: #2a2a30;
+            border-radius: 6px;
+            padding: 3px;
+        }
+
+        .toggle-group button {
+            flex: 1;
+            padding: 8px 12px;
+            margin: 0;
+            font-size: 11px;
+            border-radius: 4px;
+            background: transparent;
+            color: #888;
+            transition: all 0.2s;
+        }
+
+        .toggle-group button.active {
+            background: #7c9bff;
+            color: white;
+        }
+
+        .toggle-group button:hover:not(.active) {
+            background: #3a3a42;
+            color: #ccc;
+        }
+
+        .lighting-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 6px;
+        }
+
+        .lighting-grid button {
+            padding: 8px 6px;
+            font-size: 10px;
+            margin: 0;
+        }
+
+        .lighting-grid button.active {
+            background: #7c9bff;
+        }
+
+        .led-controls {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #555;
+        }
+
+        .led-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .led-toggle label {
+            font-size: 12px;
+            color: #ccc;
+        }
+
+        .switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #555;
+            transition: 0.3s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #7c9bff;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        .color-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .color-row .color-item {
+            flex: 1;
+        }
+
+        .color-row .color-item label {
+            display: block;
+            font-size: 10px;
+            color: #888;
+            margin-bottom: 4px;
+        }
+
+        .color-row input[type="color"] {
+            height: 30px;
+        }
     </style>
 </head>
 <body>
@@ -345,13 +473,13 @@
                 <div class="section-title">Array Settings</div>
 
                 <div class="control-group">
-                    <label>Number of Ribs <span id="countVal">20</span></label>
-                    <input type="range" id="count" min="10" max="80" value="20">
+                    <label>Number of Ribs <span id="countVal">40</span></label>
+                    <input type="range" id="count" min="10" max="80" value="40">
                 </div>
 
                 <div class="control-group">
-                    <label>Spacing (center to center) <span id="spacingVal">1"</span></label>
-                    <input type="range" id="spacing" min="1" max="50" value="1" step="0.5">
+                    <label>Spacing (center to center) <span id="spacingVal">7"</span></label>
+                    <input type="range" id="spacing" min="1" max="50" value="7" step="0.5">
                 </div>
             </div>
 
@@ -359,8 +487,8 @@
                 <div class="section-title">Rib Dimensions</div>
 
                 <div class="control-group">
-                    <label>Rib Height <span id="heightVal">72"</span></label>
-                    <input type="range" id="height" min="40" max="144" value="72" step="1">
+                    <label>Rib Height <span id="heightVal">144"</span></label>
+                    <input type="range" id="height" min="40" max="144" value="144" step="1">
                 </div>
 
                 <div class="control-group">
@@ -376,8 +504,8 @@
                 <div class="control-group">
                     <label>Rib Thickness</label>
                     <select id="thickness">
-                        <option value="0.5">0.5 inch</option>
-                        <option value="1" selected>1 inch</option>
+                        <option value="0.5" selected>0.5 inch</option>
+                        <option value="1">1 inch</option>
                     </select>
                 </div>
             </div>
@@ -423,6 +551,14 @@
             </div>
 
             <div class="section">
+                <div class="section-title">Installation Mode</div>
+                <div class="toggle-group">
+                    <button id="wall-mode" class="active" onclick="setInstallationMode('wall')">Wall</button>
+                    <button id="ceiling-mode" onclick="setInstallationMode('ceiling')">Ceiling</button>
+                </div>
+            </div>
+
+            <div class="section">
                 <div class="section-title">View</div>
                 <div class="view-buttons">
                     <button class="secondary" onclick="setView('front')">Front</button>
@@ -432,7 +568,52 @@
                 </div>
                 <div class="control-group">
                     <label>Rib Color</label>
-                    <input type="color" id="color" value="#7c9bff">
+                    <input type="color" id="color" value="#ffffff">
+                </div>
+                <div class="control-group">
+                    <label>Wall/Ceiling Color</label>
+                    <input type="color" id="backdrop-color" value="#3a3a40" onchange="updateBackdropColor()">
+                </div>
+                <div class="control-group">
+                    <label>Background Color</label>
+                    <input type="color" id="bg-color" value="#1a1a1f" onchange="updateBackgroundColor()">
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Lighting</div>
+                <div class="lighting-grid">
+                    <button id="light-standard" class="active" onclick="setLighting('standard')">Standard</button>
+                    <button id="light-dramatic" onclick="setLighting('dramatic')">Dramatic</button>
+                    <button id="light-sunset" onclick="setLighting('sunset')">Sunset</button>
+                    <button id="light-cool" onclick="setLighting('cool')">Cool Studio</button>
+                    <button id="light-night" onclick="setLighting('night')">Night</button>
+                </div>
+
+                <div class="led-controls">
+                    <div class="led-toggle">
+                        <label>LED Strip Lighting</label>
+                        <label class="switch">
+                            <input type="checkbox" id="led-enabled" onchange="toggleLEDs()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div id="led-color-controls" style="display: none;">
+                        <div class="color-row">
+                            <div class="color-item">
+                                <label>LED Start Color</label>
+                                <input type="color" id="led-color-start" value="#ff0066" onchange="updateLEDs()">
+                            </div>
+                            <div class="color-item">
+                                <label>LED End Color</label>
+                                <input type="color" id="led-color-end" value="#00ffff" onchange="updateLEDs()">
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label>LED Intensity <span id="ledIntensityVal">1.0</span></label>
+                            <input type="range" id="led-intensity" min="0.1" max="3" value="1" step="0.1" oninput="updateLEDs()">
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -452,7 +633,8 @@
 
             <div class="pricing-box">
                 <strong>Estimated Price</strong><br>
-                <span id="surfaceAreaCalc">--</span> @ $50/sf<br>
+                <strong>Ribs:</strong> <span id="surfaceAreaCalc">--</span> @ $38/sf = <span id="ribPrice">--</span><br>
+                <span id="ledPriceLine" style="display: none;"><strong>LED:</strong> <span id="ledFootage">--</span> @ $30/lf = <span id="ledPrice">--</span><br></span>
                 <span class="price" id="totalPrice">--</span>
             </div>
 
@@ -464,19 +646,31 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/lights/RectAreaLightUniformsLib.js"></script>
     <script>
         let scene, camera, renderer, controls;
         let ribMeshes = [];
         let ribProfiles = [];
         let wallMesh;
+        let ceilingMesh;
+        let ribGroup;
+        let ledLights = [];
+        let ledMeshes = [];
+        let gridHelper;
 
         // Image data
         let imageData = null;
         let imageCanvas = null;
         let imageCtx = null;
 
+        // State
+        let installationMode = 'wall';
+        let currentLighting = 'standard';
+        let lightsInScene = [];
+
         const SCALE = 0.1; // 1 inch = 0.1 units in 3D
-        const PRICE_PER_SF = 50;
+        const PRICE_PER_SF = 38;
+        const PRICE_LED_PER_LF = 30;
         const waveTypes = ['Sine', 'Smooth', 'Sharp'];
 
         function init() {
@@ -495,28 +689,26 @@
             renderer.setSize(container.clientWidth, container.clientHeight);
             renderer.setPixelRatio(window.devicePixelRatio);
             renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
             container.appendChild(renderer.domElement);
+
+            // Initialize RectAreaLight support for linear LED lighting
+            THREE.RectAreaLightUniformsLib.init();
 
             // Controls
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.05;
 
-            // Lights
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
-            scene.add(ambientLight);
+            // Rib group container
+            ribGroup = new THREE.Group();
+            scene.add(ribGroup);
 
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            directionalLight.position.set(10, 20, 10);
-            directionalLight.castShadow = true;
-            scene.add(directionalLight);
+            // Setup initial lighting
+            setLighting('standard');
 
-            const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.3);
-            directionalLight2.position.set(-10, 10, -10);
-            scene.add(directionalLight2);
-
-            // Grid helper
-            const gridHelper = new THREE.GridHelper(50, 50, 0x444444, 0x333333);
+            // Grid helper (represents floor)
+            gridHelper = new THREE.GridHelper(50, 50, 0x444444, 0x333333);
             scene.add(gridHelper);
 
             // Axes helper
@@ -747,11 +939,19 @@
         }
 
         function generateRibs() {
-            // Clear existing
-            ribMeshes.forEach(mesh => scene.remove(mesh));
+            // Clear existing ribs from group
+            ribMeshes.forEach(mesh => ribGroup.remove(mesh));
             ribMeshes = [];
             ribProfiles = [];
-            if (wallMesh) scene.remove(wallMesh);
+            if (wallMesh) {
+                ribGroup.remove(wallMesh);
+                wallMesh = null;
+            }
+            if (ceilingMesh) {
+                ribGroup.remove(ceilingMesh);
+                ceilingMesh = null;
+            }
+            clearLEDs();
 
             const params = getParams();
             const { height, thickness, count, spacing, displayResolution, color, maxDepth } = params;
@@ -793,21 +993,56 @@
                 mesh.castShadow = true;
                 mesh.receiveShadow = true;
 
-                scene.add(mesh);
+                ribGroup.add(mesh);
                 ribMeshes.push(mesh);
             }
 
-            // Wall backdrop
-            const wallGeometry = new THREE.PlaneGeometry((totalWidth + 40) * SCALE, (height + 10) * SCALE);
-            const wallMaterial = new THREE.MeshPhongMaterial({
-                color: 0x3a3a40,
-                side: THREE.DoubleSide
-            });
-            wallMesh = new THREE.Mesh(wallGeometry, wallMaterial);
-            wallMesh.rotation.y = Math.PI / 2;
-            wallMesh.position.set(-0.5 * SCALE, height * SCALE / 2, 0);
-            wallMesh.receiveShadow = true;
-            scene.add(wallMesh);
+            // Get backdrop color from picker
+            const backdropColor = document.getElementById('backdrop-color').value;
+
+            // Wall or ceiling backdrop based on mode
+            if (installationMode === 'wall') {
+                // Wall: vertical plane behind ribs at X=0
+                const wallGeometry = new THREE.PlaneGeometry((totalWidth + 40) * SCALE, (height + 10) * SCALE);
+                const wallMaterial = new THREE.MeshPhongMaterial({
+                    color: new THREE.Color(backdropColor),
+                    side: THREE.DoubleSide
+                });
+                wallMesh = new THREE.Mesh(wallGeometry, wallMaterial);
+                wallMesh.rotation.y = Math.PI / 2;
+                wallMesh.position.set(-0.5 * SCALE, height * SCALE / 2, 0);
+                wallMesh.receiveShadow = true;
+                ribGroup.add(wallMesh);
+
+                // Reset position and rotation for wall mode
+                ribGroup.rotation.set(0, 0, 0);
+                ribGroup.position.set(0, 0, 0);
+            } else {
+                // Ceiling mode - ribs rotate to hang from ceiling
+                // Ceiling plane: horizontal, same size as wall backdrop
+                const ceilingGeometry = new THREE.PlaneGeometry((totalWidth + 40) * SCALE, (height + 10) * SCALE);
+                const ceilingMaterial = new THREE.MeshPhongMaterial({
+                    color: new THREE.Color(backdropColor),
+                    side: THREE.DoubleSide
+                });
+                ceilingMesh = new THREE.Mesh(ceilingGeometry, ceilingMaterial);
+                // Same orientation as wall but will be rotated with group
+                ceilingMesh.rotation.y = Math.PI / 2;
+                ceilingMesh.position.set(-0.5 * SCALE, height * SCALE / 2, 0);
+                ceilingMesh.receiveShadow = true;
+                ribGroup.add(ceilingMesh);
+
+                // Rotate entire group -90° around Z so ribs hang down from ceiling
+                // This makes: original Y (height) -> X (horizontal), original X (wave) -> -Y (down)
+                ribGroup.rotation.set(0, 0, -Math.PI / 2);
+                // Reposition so ceiling is at top
+                ribGroup.position.set(height * SCALE / 2, actualMaxDepth * SCALE / 2, 0);
+            }
+
+            // Update LEDs if enabled
+            if (document.getElementById('led-enabled').checked) {
+                createLEDs();
+            }
 
             // Update displays
             updateDimensionsDisplay(params, totalWidth);
@@ -844,6 +1079,7 @@
             document.getElementById('wallCoverage').textContent =
                 (totalWidth / 12).toFixed(1) + "' wide x " + (params.height / 12).toFixed(1) + "' tall";
 
+            // Rib surface area calculation
             const surfaceAreaPerRibSqIn = params.height * params.maxDepth;
             const surfaceAreaPerRibSqFt = surfaceAreaPerRibSqIn / 144;
             const totalSurfaceAreaSqFt = surfaceAreaPerRibSqFt * params.count;
@@ -851,7 +1087,25 @@
             document.getElementById('surfaceArea').textContent = totalSurfaceAreaSqFt.toFixed(1) + ' sf';
             document.getElementById('surfaceAreaCalc').textContent = totalSurfaceAreaSqFt.toFixed(1) + ' sf';
 
-            const totalPrice = totalSurfaceAreaSqFt * PRICE_PER_SF;
+            // Rib price
+            const ribPrice = totalSurfaceAreaSqFt * PRICE_PER_SF;
+            document.getElementById('ribPrice').textContent = '$' + ribPrice.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+            // LED pricing (linear feet = rib height in feet × number of ribs)
+            const ledEnabled = document.getElementById('led-enabled').checked;
+            const ledLinearFeet = (params.height / 12) * params.count;
+            const ledPrice = ledLinearFeet * PRICE_LED_PER_LF;
+
+            if (ledEnabled) {
+                document.getElementById('ledPriceLine').style.display = 'block';
+                document.getElementById('ledFootage').textContent = ledLinearFeet.toFixed(1) + ' lf';
+                document.getElementById('ledPrice').textContent = '$' + ledPrice.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            } else {
+                document.getElementById('ledPriceLine').style.display = 'none';
+            }
+
+            // Total price
+            const totalPrice = ribPrice + (ledEnabled ? ledPrice : 0);
             document.getElementById('totalPrice').textContent = '$' + totalPrice.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
         }
 
@@ -972,11 +1226,28 @@
 
             const surfaceAreaPerRibSqFt = (params.height * params.maxDepth) / 144;
             const totalSurfaceAreaSqFt = surfaceAreaPerRibSqFt * params.count;
+            const ribPrice = totalSurfaceAreaSqFt * PRICE_PER_SF;
+
             csv += `\nPricing\n`;
             csv += `Surface Area per Rib,${surfaceAreaPerRibSqFt.toFixed(2)} sf\n`;
             csv += `Total Surface Area,${totalSurfaceAreaSqFt.toFixed(2)} sf\n`;
-            csv += `Price per SF,$${PRICE_PER_SF}\n`;
-            csv += `Total Price,$${(totalSurfaceAreaSqFt * PRICE_PER_SF).toFixed(2)}\n`;
+            csv += `Rib Price per SF,$${PRICE_PER_SF}\n`;
+            csv += `Rib Total,$${ribPrice.toFixed(2)}\n`;
+
+            // LED pricing
+            const ledEnabled = document.getElementById('led-enabled').checked;
+            const ledLinearFeet = (params.height / 12) * params.count;
+            const ledPrice = ledLinearFeet * PRICE_LED_PER_LF;
+
+            csv += `\nLED Lighting,${ledEnabled ? 'Yes' : 'No'}\n`;
+            if (ledEnabled) {
+                csv += `LED Linear Feet,${ledLinearFeet.toFixed(2)} lf\n`;
+                csv += `LED Price per LF,$${PRICE_LED_PER_LF}\n`;
+                csv += `LED Total,$${ledPrice.toFixed(2)}\n`;
+            }
+
+            const totalPrice = ribPrice + (ledEnabled ? ledPrice : 0);
+            csv += `\nGrand Total,$${totalPrice.toFixed(2)}\n`;
 
             downloadFile(csv, 'mr-walls-ribs.csv', 'text/csv');
         }
@@ -1001,6 +1272,256 @@
             requestAnimationFrame(animate);
             controls.update();
             renderer.render(scene, camera);
+        }
+
+        // Installation Mode
+        function setInstallationMode(mode) {
+            installationMode = mode;
+
+            document.getElementById('wall-mode').classList.toggle('active', mode === 'wall');
+            document.getElementById('ceiling-mode').classList.toggle('active', mode === 'ceiling');
+
+            generateRibs();
+
+            // Adjust camera and grid for the mode
+            const params = getParams();
+            const centerY = params.height * SCALE / 2;
+            const maxD = params.maxDepth * SCALE;
+            const floorLevel = -120 * SCALE; // 10 feet down (average ceiling height)
+
+            if (mode === 'ceiling') {
+                // Move grid down to represent floor (10' below ceiling)
+                gridHelper.position.y = floorLevel;
+                // View from side/below to see ceiling with ribs hanging down
+                camera.position.set(centerY + 10, floorLevel + 5, 20);
+                controls.target.set(centerY, floorLevel / 2, 0);
+            } else {
+                // Grid at ground level for wall mode
+                gridHelper.position.y = 0;
+                camera.position.set(15, 10, 25);
+                controls.target.set(0, centerY, 0);
+            }
+            controls.update();
+        }
+
+        // Lighting Presets
+        function setLighting(preset) {
+            currentLighting = preset;
+
+            // Update button states
+            document.querySelectorAll('.lighting-grid button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById('light-' + preset).classList.add('active');
+
+            // Clear existing lights
+            lightsInScene.forEach(light => scene.remove(light));
+            lightsInScene = [];
+
+            // Set background color based on preset
+            const presets = {
+                standard: {
+                    background: 0x1a1a1f,
+                    ambient: { color: 0xffffff, intensity: 0.4 },
+                    lights: [
+                        { type: 'directional', color: 0xffffff, intensity: 0.8, position: [10, 20, 10], castShadow: true },
+                        { type: 'directional', color: 0xffffff, intensity: 0.3, position: [-10, 10, -10] }
+                    ]
+                },
+                dramatic: {
+                    background: 0x0a0a0f,
+                    ambient: { color: 0x222244, intensity: 0.15 },
+                    lights: [
+                        { type: 'spot', color: 0xffffff, intensity: 1.5, position: [20, 15, 0], target: [0, 4, 0], angle: 0.4, castShadow: true },
+                        { type: 'directional', color: 0x4444ff, intensity: 0.2, position: [-15, 5, 10] }
+                    ]
+                },
+                sunset: {
+                    background: 0x1a1015,
+                    ambient: { color: 0xff6633, intensity: 0.2 },
+                    lights: [
+                        { type: 'directional', color: 0xff8844, intensity: 1.0, position: [25, 8, 5], castShadow: true },
+                        { type: 'directional', color: 0xff4422, intensity: 0.5, position: [20, 3, -10] },
+                        { type: 'directional', color: 0x6644aa, intensity: 0.3, position: [-10, 15, 0] }
+                    ]
+                },
+                cool: {
+                    background: 0x0f1520,
+                    ambient: { color: 0x8899cc, intensity: 0.3 },
+                    lights: [
+                        { type: 'directional', color: 0xaaccff, intensity: 0.7, position: [10, 20, 10], castShadow: true },
+                        { type: 'directional', color: 0x88aaff, intensity: 0.5, position: [-10, 15, 10] },
+                        { type: 'directional', color: 0x6688cc, intensity: 0.3, position: [0, 10, -15] }
+                    ]
+                },
+                night: {
+                    background: 0x050508,
+                    ambient: { color: 0x111133, intensity: 0.1 },
+                    lights: [
+                        { type: 'point', color: 0x4466ff, intensity: 0.8, position: [5, 8, 5] },
+                        { type: 'point', color: 0x6644aa, intensity: 0.5, position: [-5, 6, -5] },
+                        { type: 'directional', color: 0x222244, intensity: 0.2, position: [0, 20, 0] }
+                    ]
+                }
+            };
+
+            const config = presets[preset];
+            scene.background = new THREE.Color(config.background);
+
+            // Sync the background color picker with preset
+            const bgHex = '#' + new THREE.Color(config.background).getHexString();
+            document.getElementById('bg-color').value = bgHex;
+
+            // Ambient light
+            const ambient = new THREE.AmbientLight(config.ambient.color, config.ambient.intensity);
+            scene.add(ambient);
+            lightsInScene.push(ambient);
+
+            // Other lights
+            config.lights.forEach(lightConfig => {
+                let light;
+
+                if (lightConfig.type === 'directional') {
+                    light = new THREE.DirectionalLight(lightConfig.color, lightConfig.intensity);
+                    light.position.set(...lightConfig.position);
+                } else if (lightConfig.type === 'spot') {
+                    light = new THREE.SpotLight(lightConfig.color, lightConfig.intensity);
+                    light.position.set(...lightConfig.position);
+                    light.angle = lightConfig.angle || 0.5;
+                    light.penumbra = 0.3;
+                    if (lightConfig.target) {
+                        light.target.position.set(...lightConfig.target);
+                        scene.add(light.target);
+                    }
+                } else if (lightConfig.type === 'point') {
+                    light = new THREE.PointLight(lightConfig.color, lightConfig.intensity, 30);
+                    light.position.set(...lightConfig.position);
+                }
+
+                if (lightConfig.castShadow) {
+                    light.castShadow = true;
+                    if (light.shadow) {
+                        light.shadow.mapSize.width = 1024;
+                        light.shadow.mapSize.height = 1024;
+                    }
+                }
+
+                scene.add(light);
+                lightsInScene.push(light);
+            });
+        }
+
+        // LED Lighting
+        function toggleLEDs() {
+            const enabled = document.getElementById('led-enabled').checked;
+            document.getElementById('led-color-controls').style.display = enabled ? 'block' : 'none';
+
+            if (enabled) {
+                createLEDs();
+            } else {
+                clearLEDs();
+            }
+
+            // Update pricing to include/exclude LED cost
+            const params = getParams();
+            const totalWidth = (params.count - 1) * params.spacing;
+            updateDimensionsDisplay(params, totalWidth);
+        }
+
+        function clearLEDs() {
+            ledLights.forEach(light => ribGroup.remove(light));
+            ledMeshes.forEach(mesh => ribGroup.remove(mesh));
+            ledLights = [];
+            ledMeshes = [];
+        }
+
+        function updateLEDs() {
+            document.getElementById('ledIntensityVal').textContent = document.getElementById('led-intensity').value;
+            if (document.getElementById('led-enabled').checked) {
+                clearLEDs();
+                createLEDs();
+            }
+        }
+
+        function createLEDs() {
+            if (!ribProfiles.length) return;
+
+            const startColor = new THREE.Color(document.getElementById('led-color-start').value);
+            const endColor = new THREE.Color(document.getElementById('led-color-end').value);
+            const intensity = parseFloat(document.getElementById('led-intensity').value);
+
+            const params = getParams();
+            const totalWidth = (params.count - 1) * params.spacing;
+            const startZ = -(totalWidth * SCALE) / 2;
+
+            // Add lights every N ribs for performance
+            const lightInterval = Math.max(1, Math.floor(params.count / 20));
+
+            ribProfiles.forEach((rib, i) => {
+                // Calculate gradient color for this rib
+                const t = params.count > 1 ? i / (params.count - 1) : 0;
+                const ribColor = new THREE.Color().lerpColors(startColor, endColor, t);
+
+                const profile = rib.profile;
+
+                // Create glowing LED strip mesh along rib edge
+                const sampleRate = Math.max(1, Math.floor(profile.length / 25));
+                const points = [];
+                for (let p = 0; p < profile.length; p += sampleRate) {
+                    const pt = profile[p];
+                    points.push(new THREE.Vector3(pt.x * SCALE + 0.02, pt.y * SCALE, 0));
+                }
+
+                const curve = new THREE.CatmullRomCurve3(points);
+                const tubeGeometry = new THREE.TubeGeometry(curve, 20, 0.015, 4, false);
+                const tubeMaterial = new THREE.MeshBasicMaterial({
+                    color: ribColor,
+                    transparent: true,
+                    opacity: 0.95
+                });
+
+                const tubeMesh = new THREE.Mesh(tubeGeometry, tubeMaterial);
+                tubeMesh.position.z = startZ + i * params.spacing * SCALE - params.thickness * SCALE / 2;
+                ribGroup.add(tubeMesh);
+                ledMeshes.push(tubeMesh);
+
+                // Add point lights distributed along rib height (simulates linear LED strip)
+                if (i % lightInterval === 0) {
+                    // 6 point lights evenly spaced along the rib height for linear effect
+                    const numLights = 6;
+                    for (let j = 0; j < numLights; j++) {
+                        const lt = (j + 0.5) / numLights;  // Even distribution
+                        const pointIndex = Math.floor(lt * (profile.length - 1));
+                        const point = profile[pointIndex];
+
+                        // Point light positioned at rib edge, casts onto neighboring rib
+                        const light = new THREE.PointLight(ribColor, intensity * 0.5, params.spacing * SCALE * 2.5);
+                        light.position.set(
+                            point.x * SCALE + 0.05,  // Slightly off the rib edge
+                            point.y * SCALE,
+                            startZ + i * params.spacing * SCALE + params.thickness * SCALE * 0.6
+                        );
+
+                        ribGroup.add(light);
+                        ledLights.push(light);
+                    }
+                }
+            });
+        }
+
+        function updateBackdropColor() {
+            const color = document.getElementById('backdrop-color').value;
+            if (wallMesh) {
+                wallMesh.material.color.set(color);
+            }
+            if (ceilingMesh) {
+                ceilingMesh.material.color.set(color);
+            }
+        }
+
+        function updateBackgroundColor() {
+            const color = document.getElementById('bg-color').value;
+            scene.background = new THREE.Color(color);
         }
 
         // Initialize
